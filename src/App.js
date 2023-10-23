@@ -40,13 +40,16 @@ export default function App() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchMovies = async () => {
       try {
         setIsLoading(true);
         setError("");
 
         const response = await fetch(
-          `http://www.omdbapi.com/?apikey=${process.env.REACT_APP_OMDB_API_KEY}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${process.env.REACT_APP_OMDB_API_KEY}&s=${query}`,
+          { signal: controller.signal }
         );
 
         if (!response.ok) {
@@ -60,9 +63,13 @@ export default function App() {
         }
 
         setMovies(data.Search);
+        setError("");
       } catch (err) {
-        console.error(err);
-        setError(err.message);
+       
+        if (err.name !== "AbortError") {
+          console.log(err.message);
+          setError(err.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -74,7 +81,10 @@ export default function App() {
       return;
     }
 
+    handleCloseMovie();
     fetchMovies();
+
+    return () => controller.abort();
   }, [query]);
 
   return (
@@ -102,6 +112,7 @@ export default function App() {
               onCloseMovie={handleCloseMovie}
               onAddWatched={handleAddWatched}
               watched={watched}
+              key={selectedId}
             />
           ) : (
             <>
