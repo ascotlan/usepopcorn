@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import NavBar from "./components/NavBar";
 import Main from "./components/Main";
@@ -21,23 +21,26 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [watched, setWatched] = useLocalStorageState([], "watched");
-  const {movies, isLoading, error} = useMovies(query, handleCloseMovie);
 
-function handleSelectedMovie(id) {
-    setSelectedId((current) => (id === current ? null : id));
-  };
-
-  function handleCloseMovie() {
+  //useCallback to prevent infinte loop in useEffect
+  const handleCloseMovie = useCallback(function () {
     setSelectedId(null);
-  };
+  }, []);
+
+  //pass query and useCallback as parameter to useMovies
+  const { movies, isLoading, error } = useMovies(query, handleCloseMovie);
+
+  function handleSelectedMovie(id) {
+    setSelectedId((current) => (id === current ? null : id));
+  }
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
-  };
+  }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
-  };
+  }
 
   return (
     <>

@@ -50,7 +50,7 @@ export function useMovies(query, callback){
     fetchMovies();
 
     return () => controller.abort();
-  }, [query]);
+  }, [query, callback]);
 
   return {
     movies,
