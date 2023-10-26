@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import NavBar from "./components/NavBar";
 import Main from "./components/Main";
@@ -12,6 +12,7 @@ import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import MovieDetails from "./components/MovieDetails";
 import { useMovies } from "./hooks/useMovies";
+import { useLocalStorageState } from "./hooks/useLocalStorageState";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -19,11 +20,7 @@ const average = (arr) =>
 export default function App() {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  const [watched, setWatched] = useState(() => {
-    const storedVal = localStorage.getItem("watched");
-    return storedVal ? JSON.parse(storedVal) : [];
-  });
-
+  const [watched, setWatched] = useLocalStorageState([], "watched");
   const {movies, isLoading, error} = useMovies(query, handleCloseMovie);
 
 function handleSelectedMovie(id) {
@@ -41,10 +38,6 @@ function handleSelectedMovie(id) {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   };
-
-  useEffect(() => {
-    localStorage.setItem("watched", JSON.stringify(watched));
-  }, [watched]);
 
   return (
     <>
